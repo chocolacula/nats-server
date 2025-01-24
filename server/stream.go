@@ -5344,11 +5344,7 @@ type jsPubMsg struct {
 	o *consumer
 }
 
-var jsPubMsgPool = sync.Pool{
-	New: func() any {
-		return new(jsPubMsg)
-	},
-}
+var jsPubMsgPool sync.Pool
 
 func newJSPubMsg(dsubj, subj, reply string, hdr, msg []byte, o *consumer, seq uint64) *jsPubMsg {
 	var m *jsPubMsg
@@ -5373,10 +5369,11 @@ func newJSPubMsg(dsubj, subj, reply string, hdr, msg []byte, o *consumer, seq ui
 
 // Gets a jsPubMsg from the pool.
 func getJSPubMsgFromPool() *jsPubMsg {
-	pm := jsPubMsgPool.Get()
-	if pm != nil {
-		return pm.(*jsPubMsg)
-	}
+	// pm := jsPubMsgPool.Get()
+	// if pm != nil {
+	// 	GetCount.Add(1)
+	// 	return pm.(*jsPubMsg)
+	// }
 	return new(jsPubMsg)
 }
 
@@ -5391,7 +5388,8 @@ func (pm *jsPubMsg) returnToPool() {
 	if len(pm.hdr) > 0 {
 		pm.hdr = pm.hdr[:0]
 	}
-	jsPubMsgPool.Put(pm)
+	// PutCount.Add(1)
+	// jsPubMsgPool.Put(pm)
 }
 
 func (pm *jsPubMsg) size() int {

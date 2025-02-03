@@ -5367,13 +5367,16 @@ func newJSPubMsg(dsubj, subj, reply string, hdr, msg []byte, o *consumer, seq ui
 	return m
 }
 
+var GetCount atomic.Int32
+var PutCount atomic.Int32
+
 // Gets a jsPubMsg from the pool.
 func getJSPubMsgFromPool() *jsPubMsg {
-	// pm := jsPubMsgPool.Get()
-	// if pm != nil {
-	// 	GetCount.Add(1)
-	// 	return pm.(*jsPubMsg)
-	// }
+	pm := jsPubMsgPool.Get()
+	if pm != nil {
+		GetCount.Add(1)
+		return pm.(*jsPubMsg)
+	}
 	return new(jsPubMsg)
 }
 
@@ -5388,8 +5391,8 @@ func (pm *jsPubMsg) returnToPool() {
 	if len(pm.hdr) > 0 {
 		pm.hdr = pm.hdr[:0]
 	}
-	// PutCount.Add(1)
-	// jsPubMsgPool.Put(pm)
+	PutCount.Add(1)
+	jsPubMsgPool.Put(pm)
 }
 
 func (pm *jsPubMsg) size() int {
